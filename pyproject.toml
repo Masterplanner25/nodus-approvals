@@ -6,14 +6,22 @@ build-backend = "setuptools.build_meta"
 name = "nodus-approvals"
 version = "0.1.0"
 description = "Human-in-the-loop approval workflows: policy rules, request lifecycle, peer pairing codes"
+authors = [{ name = "Shawn Knight" }]
+license = { text = "MIT" }
+readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
-authors = [{ name = "Masterplanner25" }]
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=8.0"]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/Masterplanner25/nodus-approvals"
+Repository = "https://github.com/Masterplanner25/nodus-approvals"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nodus_approvals*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
