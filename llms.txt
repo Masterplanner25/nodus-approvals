@@ -8,7 +8,7 @@
 
 ## Status
 
-v0.1.0 — published on PyPI. All GitHub repos aligned at github.com/Masterplanner25.
+v0.2.0 — published on PyPI. All GitHub repos aligned at github.com/Masterplanner25.
 
 ## Install
 
