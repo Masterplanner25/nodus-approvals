@@ -6,7 +6,7 @@ Policy-driven action gating with auto/deny/require/pairing modes, a full
 request lifecycle, and cryptographic peer-pairing codes. No required
 external dependencies — pure stdlib.
 
-> **Status:** v0.1.0 — published on [PyPI](https://pypi.org/project/nodus-approvals/).
+> **Status:** v0.2.0 — published on [PyPI](https://pypi.org/project/nodus-approvals/).
 
 ---
 
