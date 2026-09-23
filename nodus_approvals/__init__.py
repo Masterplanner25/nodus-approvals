@@ -7,6 +7,8 @@ Policy:
     ApprovalMode     — AUTO | DENY | REQUIRE | PAIRING constants
     ApprovalRule     — action_pattern + mode + optional approver_ids
     ApprovalPolicy   — ordered rules; first match wins
+    declared_effects — the effect vocabulary a set of tool manifests uses
+    tools_with_effects — tool names whose manifests declare a given effect
 
 Requests:
     ApprovalRequest  — pending action approval (id, action, requester, context)
@@ -26,7 +28,13 @@ Pairing:
 """
 from .gate import ApprovalGate
 from .pairing import PairingEntry, PairingStore, generate_code
-from .policy import ApprovalMode, ApprovalPolicy, ApprovalRule
+from .policy import (
+    ApprovalMode,
+    ApprovalPolicy,
+    ApprovalRule,
+    declared_effects,
+    tools_with_effects,
+)
 from .request import ApprovalRequest, ApprovalResult
 from .store import ApprovalStore, InMemoryApprovalStore
 
@@ -35,6 +43,8 @@ __all__ = [
     "ApprovalMode",
     "ApprovalRule",
     "ApprovalPolicy",
+    "declared_effects",
+    "tools_with_effects",
     # Requests
     "ApprovalRequest",
     "ApprovalResult",

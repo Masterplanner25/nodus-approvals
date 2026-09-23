@@ -7,6 +7,48 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`ApprovalPolicy.require_for_effects(manifests, effects)`** — build a policy
+  from what each tool *declares* rather than from a list of tool names. A tool
+  whose manifest declares a gated effect requires approval because of what it
+  declares, so there is no allowlist to keep in step; everything else is
+  auto-approved. The effect vocabulary is the caller's — the coarse
+  `nodus_lang_schema.VALID_EFFECTS` or a finer `fs.read` / `fs.write` split —
+  and nothing is validated against a fixed set.
+
+  The policy is a **snapshot** of the manifests at the call; rebuild it wherever
+  the tool set changes.
+
+  It **never returns a policy that gates nothing**. An effect that no manifest
+  declares raises `ValueError`, because a typo (`"fs.wrte"`) is otherwise
+  indistinguishable from "nothing needs approval" and the two have opposite
+  consequences. Since every requested effect must be one some manifest declares,
+  at least one tool always matches — the empty-policy case is unreachable by
+  construction rather than guarded against. To pass a standard vocabulary to a
+  registry that may not use all of it, intersect with `declared_effects()` first
+  and call `allow_all()` when the result is empty.
+
+- **`declared_effects(manifests)`** — the effect vocabulary a set of manifests
+  uses. The escape hatch above, and a way to inspect what a registry declares.
+
+- **`tools_with_effects(manifests, effects)`** — the matching tool names alone,
+  in manifest order with repeats dropped, for logging what a gate will stop or
+  asserting that a newly registered tool is covered.
+
+- **15 tests** in `tests/test_policy_effects.py`. The six that constrain the
+  refusal behaviour were falsified against the naive
+  `require_for(*names) if names else allow_all()` implementation first, and are
+  red against it.
+
+### Fixed
+
+- **Docs described an `ApprovalPolicy.evaluate()` that has never existed**, and
+  gave its no-match fallback as `DENY`. The method is `resolve()` and the
+  fallback is `REQUIRE` — an unrecognised action asks a human rather than being
+  refused outright. Corrected in `README.md` and in the 0.1.0 entry below, which
+  carried the same two errors.
+
 ---
 
 ## [0.1.0] — 2026-05-30
@@ -19,8 +61,8 @@ Initial release.
 
 - **ApprovalRule** — `action_pattern` (fnmatch), `mode`, optional `approver_ids`.
 
-- **ApprovalPolicy** — ordered rules; `evaluate(action)` returns the first
-  matching rule. Default rule is DENY when no pattern matches.
+- **ApprovalPolicy** — ordered rules; `resolve(action)` returns the first
+  matching rule. Falls back to REQUIRE when no pattern matches.
 
 - **ApprovalRequest** — pending action approval record. Fields: `id`, `action`,
   `requester_id`, `context`, `created_at`, `status`.
