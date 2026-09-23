@@ -1,6 +1,6 @@
 # nodus-approvals
 
-> ApprovalGate (check/approve/deny/poll), ApprovalPolicy (fnmatch rules), PairingStore (6-digit codes).
+> ApprovalGate (check/approve/deny/poll), ApprovalPolicy (fnmatch rules, or gate on a tool's declared effects), PairingStore (6-digit codes).
 > Part of the [Masterplan Infinite Weave](https://www.the-master-plan.com/) ecosystem.
 > Created by Shawn Knight.
 
@@ -8,12 +8,12 @@
 
 ## Status
 
-v0.1.0 — prepared, not yet published. All GitHub repos aligned at github.com/Masterplanner25.
+v0.1.0 — published on PyPI. All GitHub repos aligned at github.com/Masterplanner25.
 
 ## Install
 
 ```
-pip install nodus-approvals  # once published
+pip install nodus-approvals
 pip install -e . --no-deps  # dev install
 ```
 

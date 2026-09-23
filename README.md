@@ -23,6 +23,7 @@ pip install nodus-approvals
 | Component | Purpose |
 |---|---|
 | `ApprovalPolicy` / `ApprovalRule` | fnmatch-pattern rules; first match wins |
+| `ApprovalPolicy.require_for_effects` | Gate on what a tool *declares*, not its name |
 | `ApprovalRequest` / `ApprovalResult` | Pending action + decision record |
 | `InMemoryApprovalStore` | Thread-safe request storage |
 | `ApprovalGate` | check / approve / deny / poll lifecycle |
@@ -78,8 +79,53 @@ policy = ApprovalPolicy(rules=[
 ])
 ```
 
-`policy.evaluate(action)` returns the matching `ApprovalRule` (or the default
-DENY rule if no pattern matches).
+`policy.resolve(action)` returns the matching `ApprovalRule`. When no pattern
+matches it falls back to `REQUIRE` — an unrecognised action asks a human rather
+than proceeding.
+
+### Gating on effects rather than names
+
+`require_for_effects` builds a policy from what each tool *declares*, so there is
+no allowlist of tool names to keep in step:
+
+```python
+from nodus_approvals import ApprovalPolicy, declared_effects, tools_with_effects
+
+manifests = [
+    {"name": "fs.read_file",  "effects": ["fs.read"]},
+    {"name": "fs.write_file", "effects": ["fs.read", "fs.write"]},
+    {"name": "math.add",      "effects": []},
+]
+
+policy = ApprovalPolicy.require_for_effects(manifests, ["fs.write"])
+policy.resolve("fs.write_file").mode   # "require"
+policy.resolve("fs.read_file").mode    # "auto"
+```
+
+The effect vocabulary is yours — the coarse `nodus_lang_schema.VALID_EFFECTS`
+(`pure`, `reads_state`, `writes_state`, `network`, `filesystem`, `spawns_task`)
+or a finer split such as `fs.read` / `fs.write`. Nothing here validates against a
+fixed set.
+
+Two things to know:
+
+- **The policy is a snapshot.** It is built from the manifests as they are at the
+  call. A tool registered afterwards is not covered until you rebuild. This
+  removes the allowlist, not the need to notice new tools.
+- **It never returns a policy that gates nothing.** An effect no manifest
+  declares raises `ValueError`, because a typo (`"fs.wrte"`) is otherwise
+  indistinguishable from "nothing needs approval" and the two have opposite
+  consequences. To pass a standard vocabulary against a registry that may not use
+  all of it, intersect first and decide in the open:
+
+  ```python
+  gated = set(MY_VOCABULARY) & declared_effects(manifests)
+  policy = ApprovalPolicy.require_for_effects(manifests, gated) if gated \
+      else ApprovalPolicy.allow_all()
+  ```
+
+`tools_with_effects(manifests, effects)` returns just the names, for logging what
+a gate will stop or asserting in a test that a newly registered tool is covered.
 
 ---
 
